@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"reflect"
+	"time"
 
 	"github.com/brightside-dev/go-chi-rest-api-boilerplate/internal/models"
 )
@@ -24,30 +25,67 @@ func (rp *UserRepository) GetSearchableFields() map[string]FieldMeta {
 	return SearchableFields
 }
 
+func parseBirthday(birthday interface{}) (time.Time, error) {
+	switch v := birthday.(type) {
+	case string:
+		return time.Parse("2006-01-02", v)
+	case []byte:
+		return time.Parse("2006-01-02", string(v))
+	default:
+		return time.Time{}, fmt.Errorf("unexpected type for birthday: %T", v)
+	}
+}
+
 func (rp *UserRepository) scanRow(r *sql.Row, u *models.User) error {
-	return r.Scan(
+	var birthdayRaw interface{}
+	// Scan the values from the row
+	err := r.Scan(
 		&u.ID,
 		&u.FirstName,
 		&u.LastName,
 		&u.Email,
-		&u.Birthday,
+		&birthdayRaw, // Scan the raw value of birthday first
 		&u.Country,
 		&u.CreatedAt,
 		&u.UpdatedAt,
 	)
+	if err != nil {
+		return err
+	}
+
+	// Handle the birthday conversion
+	u.Birthday, err = parseBirthday(birthdayRaw)
+	if err != nil {
+		return fmt.Errorf("invalid birthday format: %v", err)
+	}
+
+	return nil
 }
 
 func (rp *UserRepository) scanRows(r *sql.Rows, u *models.User) error {
-	return r.Scan(
+	var birthdayRaw interface{}
+	// Scan the values from the row
+	err := r.Scan(
 		&u.ID,
 		&u.FirstName,
 		&u.LastName,
 		&u.Email,
-		&u.Birthday,
+		&birthdayRaw, // Scan the raw value of birthday first
 		&u.Country,
 		&u.CreatedAt,
 		&u.UpdatedAt,
 	)
+	if err != nil {
+		return err
+	}
+
+	// Handle the birthday conversion
+	u.Birthday, err = parseBirthday(birthdayRaw)
+	if err != nil {
+		return fmt.Errorf("invalid birthday format: %v", err)
+	}
+
+	return nil
 }
 
 // Standard repository methods

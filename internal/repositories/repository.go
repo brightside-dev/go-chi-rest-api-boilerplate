@@ -5,7 +5,6 @@ import "context"
 type Repository[T any] interface {
 	GetSearchableFields() map[string]bool
 	ScanRow(ctx context.Context, row interface{}) (*T, error)
-	ScanRows(ctx context.Context, rows interface{}) ([]*T, error)
 
 	Insert(ctx context.Context, entity *T) error
 	Update(ctx context.Context, entity *T) error

@@ -6,17 +6,18 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/brightside-dev/go-chi-rest-api-boilerplate/cmd/web/utils"
+	"github.com/brightside-dev/go-chi-rest-api-boilerplate/cmd/web/validators"
 	"github.com/brightside-dev/go-chi-rest-api-boilerplate/internal/models"
 	"github.com/brightside-dev/go-chi-rest-api-boilerplate/internal/services"
 	"github.com/go-chi/chi/v5"
 )
 
 type UserController struct {
-	DB        *sql.DB
-	User      models.User
-	Validator *utils.Validator
+	DB   *sql.DB
+	User models.User
 }
 
 func (c *UserController) NewUserService(db *sql.DB) *services.UserService {
@@ -73,42 +74,46 @@ func (uc *UserController) List(w http.ResponseWriter, r *http.Request) {
 }
 
 func (uc *UserController) Create(w http.ResponseWriter, r *http.Request) {
-	// parse the request body
-	err := json.NewDecoder(r.Body).Decode(&uc.User)
+	// initialize the user request validator
+	v := validators.UserRequestValidator{}
+
+	// initialize the create user request struct
+	req := validators.CreateUserRequest{}
+
+	// Decode the request body into a create user struct
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(&req)
 	if err != nil {
 		utils.WriteAPIErrorResponse(w, r, err)
 		return
 	}
 
-	// Close the request body
-	defer r.Body.Close()
-
-	// Validate the request body
-	validator := &utils.Validator{}
-	validator.CheckField(utils.NotBlank(uc.User.FirstName), "first_name", "First name must not be blank")
-	validator.CheckField(utils.NotBlank(uc.User.LastName), "last_name", "Last name must not be blank")
-	validator.CheckField(utils.NotBlank(uc.User.Email), "email", "Email must not be blank")
-	validator.CheckField(utils.NotBlank(uc.User.Birthday), "birthday", "Birthday must not be blank")
-	validator.CheckField(utils.NotBlank(uc.User.Country), "country", "Country must not be blank")
-
-	if !validator.Valid() {
-		errorsStruct := utils.Errors{}
-		errorsStruct.Errors = validator.FieldErrors
-
-		errorsString, err := json.Marshal(errorsStruct)
-		if err != nil {
-			utils.WriteAPIErrorResponse(w, r, err)
-			return
-		}
-
-		err = errors.New(string(errorsString))
+	// Validate the request fields
+	if err := v.ValidateCreateUserRequest(req); err != nil {
 		utils.WriteAPIErrorResponse(w, r, err)
 		return
+	}
+
+	// Parse the Birthday string into time.Time
+	birthday, err := time.Parse("2006-01-02", req.Birthday)
+	if err != nil {
+		error := errors.New("invalid birthday format, expected YYYY-MM-DD")
+		utils.WriteAPIErrorResponse(w, r, error)
+		return
+	}
+
+	// Set the user struct
+	uc.User = models.User{
+		FirstName: req.FirstName,
+		LastName:  req.LastName,
+		Email:     req.Email,
+		Birthday:  birthday,
 	}
 
 	// Create a new user service
 	userService := uc.NewUserService(uc.DB)
 
+	// Call the user service's Create() method which returns a userDTO
 	userDTO, err := userService.Create(r.Context(), uc.User)
 	if err != nil {
 		utils.WriteAPIErrorResponse(w, r, err)
