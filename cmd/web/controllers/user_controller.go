@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"database/sql"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -15,19 +14,17 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
+// DI
 type UserController struct {
-	DB   *sql.DB
-	User models.User
+	UserService *services.UserService
 }
 
-func (c *UserController) NewUserService(db *sql.DB) *services.UserService {
-	return &services.UserService{DB: db}
+// DI
+func NewUserController(userService *services.UserService) *UserController {
+	return &UserController{UserService: userService}
 }
 
 func (uc *UserController) Get(w http.ResponseWriter, r *http.Request) {
-	// Create a new user service
-	userService := uc.NewUserService(uc.DB)
-
 	// check if the id exists in the URL
 	if chi.URLParam(r, "id") == "" {
 		utils.WriteAPIErrorResponse(w, r, errors.New("invalid user ID"))
@@ -42,7 +39,7 @@ func (uc *UserController) Get(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Call the user service's Get() method
-	userDTO, err := userService.Get(r.Context(), id)
+	userDTO, err := uc.UserService.Get(r.Context(), id)
 	if err != nil {
 		utils.WriteAPIErrorResponse(w, r, err)
 		return
@@ -56,11 +53,8 @@ func (uc *UserController) Get(w http.ResponseWriter, r *http.Request) {
 }
 
 func (uc *UserController) List(w http.ResponseWriter, r *http.Request) {
-	// Create a new user service
-	userService := uc.NewUserService(uc.DB)
-
 	// Call the UserRepository's List() method
-	usersDTO, err := userService.List(r.Context())
+	usersDTO, err := uc.UserService.List(r.Context())
 	if err != nil {
 		utils.WriteAPIErrorResponse(w, r, err)
 		return
@@ -103,18 +97,15 @@ func (uc *UserController) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Set the user struct
-	uc.User = models.User{
+	user := models.User{
 		FirstName: req.FirstName,
 		LastName:  req.LastName,
 		Email:     req.Email,
 		Birthday:  birthday,
 	}
 
-	// Create a new user service
-	userService := uc.NewUserService(uc.DB)
-
 	// Call the user service's Create() method which returns a userDTO
-	userDTO, err := userService.Create(r.Context(), uc.User)
+	userDTO, err := uc.UserService.Create(r.Context(), user)
 	if err != nil {
 		utils.WriteAPIErrorResponse(w, r, err)
 		return

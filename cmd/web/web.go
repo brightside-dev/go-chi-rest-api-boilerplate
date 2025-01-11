@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/brightside-dev/go-chi-rest-api-boilerplate/database"
+	"github.com/brightside-dev/go-chi-rest-api-boilerplate/internal/container"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -38,7 +39,11 @@ func StartServer() {
 		}
 	}(db)
 
-	SetupRoutes(r, db)
+	// Initialize the DI container
+	container := container.NewContainer(db)
+
+	// Setup routes with the DI container
+	SetupRoutes(r, container)
 
 	http.ListenAndServe(":3000", r)
 }

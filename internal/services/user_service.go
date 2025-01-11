@@ -10,7 +10,7 @@ import (
 )
 
 type UserService struct {
-	DB *sql.DB
+	UserRepository *repositories.UserRepository
 }
 
 func (us *UserService) NewUserRepository(db *sql.DB) *repositories.UserRepository {
@@ -18,9 +18,7 @@ func (us *UserService) NewUserRepository(db *sql.DB) *repositories.UserRepositor
 }
 
 func (us *UserService) Get(ctx context.Context, id int) (dtos.UserDTO, error) {
-	ur := us.NewUserRepository(us.DB)
-
-	user, err := ur.FindById(ctx, id)
+	user, err := us.UserRepository.FindById(ctx, id)
 	if err != nil {
 		return dtos.UserDTO{}, err
 	}
@@ -34,9 +32,7 @@ func (us *UserService) Get(ctx context.Context, id int) (dtos.UserDTO, error) {
 }
 
 func (us *UserService) List(ctx context.Context) (dtos.UsersDTO, error) {
-	ur := us.NewUserRepository(us.DB)
-
-	users, err := ur.FindAll(ctx, 0, 0)
+	users, err := us.UserRepository.FindAll(ctx, 0, 0)
 	if err != nil {
 		return dtos.UsersDTO{}, err
 	}
@@ -49,9 +45,7 @@ func (us *UserService) List(ctx context.Context) (dtos.UsersDTO, error) {
 }
 
 func (us *UserService) Create(ctx context.Context, user models.User) (dtos.UserDTO, error) {
-	ur := us.NewUserRepository(us.DB)
-
-	newUser, err := ur.Insert(ctx, user)
+	newUser, err := us.UserRepository.Insert(ctx, user)
 	if err != nil {
 		return dtos.UserDTO{}, err
 	}
