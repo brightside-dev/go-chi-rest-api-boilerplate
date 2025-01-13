@@ -14,5 +14,6 @@ func SetupRoutes(r *chi.Mux, container *Container) {
 		r.Get("/api/users", userController.List)
 		r.Post("/api/users", userController.Create)
 		r.Get("/api/users/{id}", userController.Get)
+		r.Put("/api/users/update/{id}", userController.Update)
 	})
 }

@@ -129,10 +129,10 @@ func (rp *UserRepository) Insert(ctx context.Context, u models.User) (models.Use
 	return u, nil
 }
 
-func (rp *UserRepository) Update(ctx context.Context, u models.User) (int, error) {
+func (rp *UserRepository) Update(ctx context.Context, u models.User) (models.User, error) {
 	tx, err := rp.DB.BeginTx(ctx, nil)
 	if err != nil {
-		return 0, err
+		return models.User{}, err
 	}
 
 	defer func() {
@@ -140,24 +140,28 @@ func (rp *UserRepository) Update(ctx context.Context, u models.User) (int, error
 	}()
 
 	// Update statement
-	stmt := `UPDATE users SET first_name = ?, last_name = ?, email = ?, birthday = ?, country = ? WHERE id = ?`
+	stmt := `UPDATE users SET first_name = ?, last_name = ?, birthday = ?, country = ? WHERE id = ?`
 
-	result, err := tx.ExecContext(ctx, stmt, u.FirstName, u.LastName, u.Email, u.Birthday, u.Country, u.ID)
+	result, err := tx.ExecContext(ctx, stmt, u.FirstName, u.LastName, u.Birthday, u.Country, u.ID)
 	if err != nil {
-		return 0, err
+		return models.User{}, err
 	}
 
-	// Retrieve the number of rows affected
+	// Check rows affected
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return 0, err
+		return models.User{}, err
+	}
+
+	if rowsAffected == 0 {
+		return models.User{}, fmt.Errorf("no rows updated, user with ID %d might not exist", u.ID)
 	}
 
 	if err := tx.Commit(); err != nil {
-		return 0, err
+		return models.User{}, err
 	}
 
-	return int(rowsAffected), nil
+	return u, nil
 }
 
 func (rp *UserRepository) Delete(ctx context.Context, id int) (int, error) {
