@@ -17,11 +17,15 @@ import (
 // DI
 type UserController struct {
 	UserService *services.UserService
+	Validator   *validators.UserRequestValidator
 }
 
 // DI
 func NewUserController(userService *services.UserService) *UserController {
-	return &UserController{UserService: userService}
+	return &UserController{
+		UserService: userService,
+		Validator:   &validators.UserRequestValidator{},
+	}
 }
 
 func (uc *UserController) Get(w http.ResponseWriter, r *http.Request) {
@@ -68,22 +72,19 @@ func (uc *UserController) List(w http.ResponseWriter, r *http.Request) {
 }
 
 func (uc *UserController) Create(w http.ResponseWriter, r *http.Request) {
-	// initialize the user request validator
-	v := validators.UserRequestValidator{}
-
 	// initialize the create user request struct
 	req := validators.CreateUserRequest{}
+
+	// validate the request
+	if err := uc.Validator.ValidateCreateUserRequest(req); err != nil {
+		utils.WriteAPIErrorResponse(w, r, err)
+		return
+	}
 
 	// Decode the request body into a create user struct
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&req)
 	if err != nil {
-		utils.WriteAPIErrorResponse(w, r, err)
-		return
-	}
-
-	// Validate the request fields
-	if err := v.ValidateCreateUserRequest(req); err != nil {
 		utils.WriteAPIErrorResponse(w, r, err)
 		return
 	}
@@ -116,4 +117,8 @@ func (uc *UserController) Create(w http.ResponseWriter, r *http.Request) {
 		Success: true,
 		Data:    userDTO,
 	})
+}
+
+func (uc *UserController) Update(w http.ResponseWriter, r *http.Request) {
+
 }

@@ -7,11 +7,19 @@ import (
 	"os"
 
 	"github.com/brightside-dev/go-chi-rest-api-boilerplate/database"
-	"github.com/brightside-dev/go-chi-rest-api-boilerplate/internal/container"
+	"github.com/brightside-dev/go-chi-rest-api-boilerplate/internal/repositories"
+	"github.com/brightside-dev/go-chi-rest-api-boilerplate/internal/services"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 )
+
+type Container struct {
+	DB             *sql.DB
+	UserService    *services.UserService
+	UserRepository *repositories.UserRepository
+	Logger         *slog.Logger
+}
 
 func StartServer() {
 	r := chi.NewRouter()
@@ -39,11 +47,22 @@ func StartServer() {
 		}
 	}(db)
 
-	// Initialize the DI container
-	container := container.NewContainer(db)
+	container := newContainer(db, logger)
 
 	// Setup routes with the DI container
 	SetupRoutes(r, container)
 
 	http.ListenAndServe(":3000", r)
+}
+
+func newContainer(db *sql.DB, logger *slog.Logger) *Container {
+	userRepository := &repositories.UserRepository{DB: db}
+	userService := &services.UserService{UserRepository: userRepository}
+
+	return &Container{
+		DB:             db,
+		UserService:    userService,
+		UserRepository: userRepository,
+		Logger:         logger,
+	}
 }
