@@ -44,6 +44,7 @@ func (rp *UserRepository) scanRow(r *sql.Row, u *models.User) error {
 		&u.FirstName,
 		&u.LastName,
 		&u.Email,
+		&u.Password,
 		&birthdayRaw, // Scan the raw value of birthday first
 		&u.Country,
 		&u.CreatedAt,
@@ -70,6 +71,7 @@ func (rp *UserRepository) scanRows(r *sql.Rows, u *models.User) error {
 		&u.FirstName,
 		&u.LastName,
 		&u.Email,
+		&u.Password,
 		&birthdayRaw, // Scan the raw value of birthday first
 		&u.Country,
 		&u.CreatedAt,
@@ -102,12 +104,12 @@ func (rp *UserRepository) Insert(ctx context.Context, u models.User) (models.Use
 	}()
 
 	// Insert statement
-	stmt := `INSERT INTO users (first_name, last_name, email, birthday, country) VALUES (?, ?, ?, ?, ?)`
+	stmt := `INSERT INTO users (first_name, last_name, email, password, birthday, country) VALUES (?, ?, ?, ?, ?, ?)`
 
 	// Execute the query
 
 	// Using the tx.ExecContext() method to execute the query and get last user id
-	result, err := tx.ExecContext(ctx, stmt, u.FirstName, u.LastName, u.Email, u.Birthday, u.Country)
+	result, err := tx.ExecContext(ctx, stmt, u.FirstName, u.LastName, u.Email, u.Password, u.Birthday, u.Country)
 	if err != nil {
 		return models.User{}, err
 	}

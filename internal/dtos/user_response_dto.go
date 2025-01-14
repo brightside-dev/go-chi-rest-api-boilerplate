@@ -2,11 +2,11 @@ package dtos
 
 import "github.com/brightside-dev/go-chi-rest-api-boilerplate/internal/models"
 
-type UserDTO struct {
+type UserResponseDTO struct {
 	ID        int    `json:"id"`
 	FirstName string `json:"first_name"`
 }
 
-type UsersDTO struct {
+type UsersResponseDTO struct {
 	Users *[]models.User `json:"users"`
 }

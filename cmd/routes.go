@@ -19,5 +19,6 @@ func SetupRoutes(r *chi.Mux, container *Container) {
 		// Create a new authController
 		authController := controllers.NewAuthController(container.AuthService)
 		r.Post("/api/auth/login", authController.Login)
+		r.Post("/api/auth/register", authController.Register)
 	})
 }

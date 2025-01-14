@@ -11,6 +11,15 @@ type AuthRequestValidator struct {
 	validate *validator.Validate
 }
 
+type RegisterRequest struct {
+	FirstName string `json:"first_name" validate:"required"`
+	LastName  string `json:"last_name" validate:"required"`
+	Email     string `json:"email" validate:"required,email"`
+	Password  string `json:"password" validate:"required,min=5,max=32,alphanum"`
+	Country   string `json:"country" validate:"required"`
+	Birthday  string `json:"birthday" validate:"required"`
+}
+
 type LoginRequest struct {
 	Email    string `json:"email" validate:"required,email"`
 	Password string `json:"password" validate:"required"`
@@ -46,6 +55,10 @@ func (ar *AuthRequestValidator) formatErrorMessage(err validator.FieldError) str
 		return fmt.Sprintf("%s is required", err.Field())
 	case "email":
 		return fmt.Sprintf("%s must be a valid email address", err.Field())
+	case "min":
+		return fmt.Sprintf("%s must be at least %s characters long", err.Field(), err.Param())
+	case "max":
+		return fmt.Sprintf("%s must be at most %s characters long", err.Field(), err.Param())
 	default:
 		return fmt.Sprintf("%s is invalid", err.Field())
 	}
