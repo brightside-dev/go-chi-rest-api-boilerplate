@@ -36,7 +36,7 @@ func (ur *UserRequestValidator) ValidateRequest(req interface{}) error {
 		// Generate user-friendly error messages
 		var errorMessages []string
 		for _, err := range err.(validator.ValidationErrors) {
-			errorMessages = append(errorMessages, formatErrorMessage(err))
+			errorMessages = append(errorMessages, ur.formatErrorMessage(err))
 		}
 		return fmt.Errorf("%s", strings.Join(errorMessages, ", "))
 	}
@@ -44,7 +44,7 @@ func (ur *UserRequestValidator) ValidateRequest(req interface{}) error {
 }
 
 // Format error messages
-func formatErrorMessage(err validator.FieldError) string {
+func (ur *UserRequestValidator) formatErrorMessage(err validator.FieldError) string {
 	switch err.Tag() {
 	case "required":
 		return fmt.Sprintf("%s is required", err.Field())
