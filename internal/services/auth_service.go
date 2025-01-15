@@ -82,6 +82,7 @@ func (as *AuthService) Register(ctx context.Context, user models.User) (dtos.Reg
 	if err != nil {
 		return dtos.RegisterResponseDTO{}, errors.New("failed to check existing users")
 	}
+
 	if len(existingUsers) > 0 {
 		return dtos.RegisterResponseDTO{}, errors.New("email is already registered")
 	}

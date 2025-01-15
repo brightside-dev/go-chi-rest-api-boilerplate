@@ -30,7 +30,7 @@ func (ac *AuthController) Register(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&req)
 	if err != nil {
-		// TODO - refactor custom error message
+		// TODO - refactor custom error message to avoid repetition
 		err = errors.New("invalid request body")
 		utils.WriteAPIErrorResponse(w, r, err)
 		return
@@ -58,7 +58,7 @@ func (ac *AuthController) Register(w http.ResponseWriter, r *http.Request) {
 		Birthday:  birthday,
 	}
 
-	registerResponseDTO, err := ac.AuthService.Register(r.Context(), user)
+	dto, err := ac.AuthService.Register(r.Context(), user)
 	if err != nil {
 		utils.WriteAPIErrorResponse(w, r, err)
 		return
@@ -66,7 +66,7 @@ func (ac *AuthController) Register(w http.ResponseWriter, r *http.Request) {
 
 	utils.WriteAPISuccessResponse(w, r, utils.APIResponse{
 		Success: true,
-		Data:    registerResponseDTO,
+		Data:    dto,
 	})
 }
 
