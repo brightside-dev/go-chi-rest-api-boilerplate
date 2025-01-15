@@ -7,10 +7,10 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/brightside-dev/go-chi-rest-api-boilerplate/cmd/utils"
-	"github.com/brightside-dev/go-chi-rest-api-boilerplate/cmd/validators"
 	"github.com/brightside-dev/go-chi-rest-api-boilerplate/internal/models"
 	"github.com/brightside-dev/go-chi-rest-api-boilerplate/internal/services"
+	"github.com/brightside-dev/go-chi-rest-api-boilerplate/internal/utils"
+	"github.com/brightside-dev/go-chi-rest-api-boilerplate/internal/validators"
 	"github.com/go-chi/chi/v5"
 )
 

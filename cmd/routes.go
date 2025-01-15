@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/brightside-dev/go-chi-rest-api-boilerplate/cmd/controllers"
+	"github.com/brightside-dev/go-chi-rest-api-boilerplate/internal/middlewares"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/jwtauth/v5"
 )
@@ -14,7 +15,7 @@ func SetupRoutes(r *chi.Mux, container *Container) {
 	r.Group(func(r chi.Router) {
 		// Use the JWT token verifier middleware
 		r.Use(jwtauth.Verifier(container.TokenAuth))
-		r.Use(JWTAuthMiddleware)
+		r.Use(middlewares.Auth)
 
 		// Create a new userController
 		userController := controllers.NewUserController(container.UserService)

@@ -50,7 +50,7 @@ func main() {
 	config := newConfig(logger)
 
 	// Initialize DB connection
-	db, err := openDBConnection(*config, logger)
+	db, err := openDB(*config, logger)
 	if err != nil {
 		logger.Error(err.Error())
 		os.Exit(1)

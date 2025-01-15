@@ -11,7 +11,7 @@ import (
 
 // The openDB() function wraps sql.Open() and returns a sql.DB connection pool
 // for a given DSN
-func openDBConnection(config Config, logger *slog.Logger) (*sql.DB, error) {
+func openDB(config Config, logger *slog.Logger) (*sql.DB, error) {
 
 	// Create a DSN from the environment variables
 	dsn := config.DBUser + ":" + config.DBPass + "@/" + config.DBHost
