@@ -2,6 +2,7 @@ package config
 
 import (
 	"database/sql"
+	"html/template"
 	"log/slog"
 
 	"github.com/brightside-dev/go-chi-rest-api-boilerplate/internal/repositories"
@@ -12,6 +13,7 @@ import (
 type Container struct {
 	Config         *Config
 	DB             *sql.DB
+	TemplateCache  map[string]*template.Template
 	UserService    *services.UserService
 	UserRepository *repositories.UserRepository
 	AuthService    *services.AuthService
