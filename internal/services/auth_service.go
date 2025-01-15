@@ -3,6 +3,8 @@ package services
 import (
 	"context"
 	"errors"
+	"strconv"
+	"time"
 
 	"github.com/brightside-dev/go-chi-rest-api-boilerplate/internal/dtos"
 	"github.com/brightside-dev/go-chi-rest-api-boilerplate/internal/models"
@@ -47,10 +49,14 @@ func (as *AuthService) Login(
 
 	// Generate JWT token
 	tokenAuth := jwtauth.New("HS256", []byte("secret"), nil)
-	_, tokenString, _ := tokenAuth.Encode(map[string]interface{}{
-		"user_id": user.ID,
-		"test":    "test",
+	_, tokenString, err := tokenAuth.Encode(map[string]interface{}{
+		"sub": strconv.Itoa(user.ID),
+		"iat": time.Now().Unix(),
+		"exp": time.Now().Add(time.Hour).Unix(),
 	})
+	if err != nil {
+		return dtos.LoginResponseDTO{}, err
+	}
 
 	// Build response DTO
 	userResponseDTO := dtos.UserResponseDTO{

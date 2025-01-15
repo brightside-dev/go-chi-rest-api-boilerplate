@@ -11,6 +11,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/jwtauth/v5"
 	"github.com/joho/godotenv"
 )
 
@@ -21,6 +22,7 @@ type Container struct {
 	UserRepository *repositories.UserRepository
 	AuthService    *services.AuthService
 	Logger         *slog.Logger
+	TokenAuth      *jwtauth.JWTAuth
 }
 
 type Config struct {
@@ -76,6 +78,7 @@ func newContainer(config *Config, db *sql.DB, logger *slog.Logger) *Container {
 	userRepository := &repositories.UserRepository{DB: db}
 	userService := &services.UserService{UserRepository: userRepository}
 	authService := &services.AuthService{UserRepository: userRepository}
+	tokenAuth := jwtauth.New("HS256", []byte(config.JWTSecret), nil)
 
 	return &Container{
 		Config:         config,
@@ -84,6 +87,7 @@ func newContainer(config *Config, db *sql.DB, logger *slog.Logger) *Container {
 		AuthService:    authService,
 		UserRepository: userRepository,
 		Logger:         logger,
+		TokenAuth:      tokenAuth,
 	}
 }
 
