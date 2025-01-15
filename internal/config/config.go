@@ -28,4 +28,5 @@ type Config struct {
 	JWTSecret     string
 	MailgunDomain string
 	MailgunAPIKey string
+	FirebaseKey   string
 }

@@ -90,6 +90,7 @@ func newConfig(logger *slog.Logger) *config.Config {
 		JWTSecret:     os.Getenv("JWT_SECRET"),
 		MailgunDomain: os.Getenv("MAILGUN_DOMAIN"),
 		MailgunAPIKey: os.Getenv("MAILGUN_API_KEY"),
+		FirebaseKey:   os.Getenv("FIREBASE_KEY"),
 	}
 
 	// Check that none of the config values are empty
@@ -100,7 +101,8 @@ func newConfig(logger *slog.Logger) *config.Config {
 		config.DBName == "" ||
 		config.JWTSecret == "" ||
 		config.MailgunDomain == "" ||
-		config.MailgunAPIKey == "" {
+		config.MailgunAPIKey == "" ||
+		config.FirebaseKey == "" {
 		logger.Error("One or more required environment variables are missing")
 		os.Exit(1)
 	}
