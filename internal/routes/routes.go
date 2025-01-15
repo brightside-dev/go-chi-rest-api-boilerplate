@@ -1,13 +1,14 @@
-package main
+package routes
 
 import (
-	"github.com/brightside-dev/go-chi-rest-api-boilerplate/cmd/controllers"
+	"github.com/brightside-dev/go-chi-rest-api-boilerplate/internal/config"
+	"github.com/brightside-dev/go-chi-rest-api-boilerplate/internal/controllers"
 	"github.com/brightside-dev/go-chi-rest-api-boilerplate/internal/middlewares"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/jwtauth/v5"
 )
 
-func SetupRoutes(r *chi.Mux, container *Container) {
+func SetupRoutes(r *chi.Mux, container *config.Container) {
 	// Create a new authController
 	authController := controllers.NewAuthController(container.AuthService)
 

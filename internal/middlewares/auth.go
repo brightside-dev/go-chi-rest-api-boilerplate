@@ -21,8 +21,8 @@ func Auth(next http.Handler) http.Handler {
 			return
 		}
 
-		// Verify the token's "exp" exists and is a float64
-		expClaim, ok := claims["exp"].(float64) // The "exp" is usually a float64
+		// Verify the token's "exp" exists and is a string
+		expClaim, ok := claims["exp"].(time.Time)
 		if !ok {
 			customErr := errors.New("invalid token: missing or malformed 'exp' claim")
 			utils.WriteAPIErrorResponse(w, r, customErr)
@@ -30,7 +30,7 @@ func Auth(next http.Handler) http.Handler {
 		}
 
 		// Check if the token has expired
-		if time.Now().Unix() > int64(expClaim) {
+		if time.Now().After(expClaim) {
 			customErr := errors.New("token has expired")
 			utils.WriteAPIErrorResponse(w, r, customErr)
 			return

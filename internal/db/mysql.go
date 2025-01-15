@@ -1,4 +1,4 @@
-package main
+package db
 
 import (
 	"context"
@@ -6,12 +6,14 @@ import (
 	"log/slog"
 	"time"
 
+	"github.com/brightside-dev/go-chi-rest-api-boilerplate/internal/config"
+
 	_ "github.com/go-sql-driver/mysql"
 )
 
 // The openDB() function wraps sql.Open() and returns a sql.DB connection pool
 // for a given DSN
-func openDB(config Config, logger *slog.Logger) (*sql.DB, error) {
+func OpenDB(config *config.Config, logger *slog.Logger) (*sql.DB, error) {
 
 	// Create a DSN from the environment variables
 	dsn := config.DBUser + ":" + config.DBPass + "@/" + config.DBHost

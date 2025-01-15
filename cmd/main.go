@@ -6,7 +6,10 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/brightside-dev/go-chi-rest-api-boilerplate/internal/config"
+	"github.com/brightside-dev/go-chi-rest-api-boilerplate/internal/db"
 	"github.com/brightside-dev/go-chi-rest-api-boilerplate/internal/repositories"
+	"github.com/brightside-dev/go-chi-rest-api-boilerplate/internal/routes"
 	"github.com/brightside-dev/go-chi-rest-api-boilerplate/internal/services"
 
 	"github.com/go-chi/chi/v5"
@@ -14,25 +17,6 @@ import (
 	"github.com/go-chi/jwtauth/v5"
 	"github.com/joho/godotenv"
 )
-
-type Container struct {
-	Config         *Config
-	DB             *sql.DB
-	UserService    *services.UserService
-	UserRepository *repositories.UserRepository
-	AuthService    *services.AuthService
-	Logger         *slog.Logger
-	TokenAuth      *jwtauth.JWTAuth
-}
-
-type Config struct {
-	DBUser    string
-	DBPass    string
-	DBHost    string
-	DBPort    string
-	DBName    string
-	JWTSecret string
-}
 
 func main() {
 	// Initialize Chi router
@@ -47,10 +31,10 @@ func main() {
 	}))
 
 	// Initialize config
-	config := newConfig(logger)
+	conf := newConfig(logger)
 
 	// Initialize DB connection
-	db, err := openDB(*config, logger)
+	db, err := db.OpenDB(conf, logger)
 	if err != nil {
 		logger.Error(err.Error())
 		os.Exit(1)
@@ -65,23 +49,23 @@ func main() {
 	}(db)
 
 	// Initialize DI container
-	container := newContainer(config, db, logger)
+	container := newContainer(*conf, db, logger)
 
 	// Initialize routes
-	SetupRoutes(r, container)
+	routes.SetupRoutes(r, container)
 
 	// Start the server
 	http.ListenAndServe(":3000", r)
 }
 
-func newContainer(config *Config, db *sql.DB, logger *slog.Logger) *Container {
+func newContainer(conf config.Config, db *sql.DB, logger *slog.Logger) *config.Container {
 	userRepository := &repositories.UserRepository{DB: db}
 	userService := &services.UserService{UserRepository: userRepository}
 	authService := &services.AuthService{UserRepository: userRepository}
-	tokenAuth := jwtauth.New("HS256", []byte(config.JWTSecret), nil)
+	tokenAuth := jwtauth.New("HS256", []byte(conf.JWTSecret), nil)
 
-	return &Container{
-		Config:         config,
+	return &config.Container{
+		Config:         &conf,
 		DB:             db,
 		UserService:    userService,
 		AuthService:    authService,
@@ -91,14 +75,14 @@ func newContainer(config *Config, db *sql.DB, logger *slog.Logger) *Container {
 	}
 }
 
-func newConfig(logger *slog.Logger) *Config {
+func newConfig(logger *slog.Logger) *config.Config {
 	err := godotenv.Load()
 	if err != nil {
 		logger.Error("Error loading .env file")
 		os.Exit(1)
 	}
 
-	config := &Config{DBUser: os.Getenv("DB_USER"),
+	config := &config.Config{DBUser: os.Getenv("DB_USER"),
 		DBPass:    os.Getenv("DB_PASSWORD"),
 		DBHost:    os.Getenv("DB_HOST"),
 		DBPort:    os.Getenv("DB_PORT"),
