@@ -83,11 +83,13 @@ func newConfig(logger *slog.Logger) *config.Config {
 	}
 
 	config := &config.Config{DBUser: os.Getenv("DB_USER"),
-		DBPass:    os.Getenv("DB_PASSWORD"),
-		DBHost:    os.Getenv("DB_HOST"),
-		DBPort:    os.Getenv("DB_PORT"),
-		DBName:    os.Getenv("DB_NAME"),
-		JWTSecret: os.Getenv("JWT_SECRET"),
+		DBPass:        os.Getenv("DB_PASSWORD"),
+		DBHost:        os.Getenv("DB_HOST"),
+		DBPort:        os.Getenv("DB_PORT"),
+		DBName:        os.Getenv("DB_NAME"),
+		JWTSecret:     os.Getenv("JWT_SECRET"),
+		MailgunDomain: os.Getenv("MAILGUN_DOMAIN"),
+		MailgunAPIKey: os.Getenv("MAILGUN_API_KEY"),
 	}
 
 	// Check that none of the config values are empty
@@ -96,7 +98,9 @@ func newConfig(logger *slog.Logger) *config.Config {
 		config.DBHost == "" ||
 		config.DBPort == "" ||
 		config.DBName == "" ||
-		config.JWTSecret == "" {
+		config.JWTSecret == "" ||
+		config.MailgunDomain == "" ||
+		config.MailgunAPIKey == "" {
 		logger.Error("One or more required environment variables are missing")
 		os.Exit(1)
 	}

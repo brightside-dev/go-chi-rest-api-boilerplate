@@ -20,10 +20,12 @@ type Container struct {
 }
 
 type Config struct {
-	DBUser    string
-	DBPass    string
-	DBHost    string
-	DBPort    string
-	DBName    string
-	JWTSecret string
+	DBUser        string
+	DBPass        string
+	DBHost        string
+	DBPort        string
+	DBName        string
+	JWTSecret     string
+	MailgunDomain string
+	MailgunAPIKey string
 }
