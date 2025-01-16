@@ -19,7 +19,7 @@ func (us *UserService) NewUserRepository(db *sql.DB) *repositories.UserRepositor
 }
 
 func (us *UserService) Get(ctx context.Context, id int) (dtos.UserResponseDTO, error) {
-	user, err := us.UserRepository.FindById(ctx, id)
+	user, err := us.UserRepository.FindOneById(ctx, id)
 	if err != nil {
 		return dtos.UserResponseDTO{}, err
 	}
@@ -71,7 +71,7 @@ func (us *UserService) Create(ctx context.Context, user models.User) (dtos.UserR
 func (us *UserService) Update(ctx context.Context, user models.User) (dtos.UserResponseDTO, error) {
 	dto := dtos.UserResponseDTO{}
 
-	dbUser, err := us.UserRepository.FindById(ctx, user.ID)
+	dbUser, err := us.UserRepository.FindOneById(ctx, user.ID)
 	if err != nil {
 		return dtos.UserResponseDTO{}, err
 	}

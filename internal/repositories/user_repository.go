@@ -10,7 +10,7 @@ import (
 	"github.com/brightside-dev/go-chi-rest-api-boilerplate/internal/models"
 )
 
-var SearchableFields = map[string]FieldMeta{
+var UserSearchableFields = map[string]FieldMeta{
 	"id":         {Allowed: true, Type: "int"},
 	"first_name": {Allowed: true, Type: "string"},
 	"last_name":  {Allowed: true, Type: "string"},
@@ -19,10 +19,6 @@ var SearchableFields = map[string]FieldMeta{
 
 type UserRepository struct {
 	DB *sql.DB
-}
-
-func (rp *UserRepository) GetSearchableFields() map[string]FieldMeta {
-	return SearchableFields
 }
 
 func parseBirthday(birthday interface{}) (time.Time, error) {
@@ -197,7 +193,7 @@ func (rp *UserRepository) Delete(ctx context.Context, id int) (int, error) {
 	return int(rowsAffected), nil
 }
 
-func (rp *UserRepository) FindById(ctx context.Context, id int) (models.User, error) {
+func (rp *UserRepository) FindOneById(ctx context.Context, id int) (models.User, error) {
 	// Query to find user by id
 	stmt := `SELECT * FROM users WHERE id = ?`
 
@@ -258,7 +254,7 @@ func (rp *UserRepository) FindAll(ctx context.Context, limit int, offset int) ([
 
 func (rp *UserRepository) FindBy(ctx context.Context, field string, value interface{}, limit int, offset int) ([]models.User, error) {
 	// Check if the field is searchable
-	fieldMeta, ok := SearchableFields[field]
+	fieldMeta, ok := UserSearchableFields[field]
 	if !ok {
 		return nil, fmt.Errorf("field %s is not searchable", field)
 	}
