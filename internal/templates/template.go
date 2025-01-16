@@ -1,18 +1,13 @@
 package templates
 
 import (
-	"bytes"
-	"fmt"
 	"html/template"
 	"net/http"
-	"path/filepath"
 	"time"
 )
 
 type TemplateData struct {
 	CurrentYear int
-	Form        any
-	Flash       string
 }
 
 // Create a humanDate function which returns a nicely formatted string
@@ -28,76 +23,26 @@ var functions = template.FuncMap{
 	"humanDate": humanDate,
 }
 
-func NewTemplateCache() (map[string]*template.Template, error) {
-	// Initialise a new ma to act as the cache
-	cache := map[string]*template.Template{}
+func Render(w http.ResponseWriter, r *http.Request, page string, data *TemplateData) {
+	files := []string{
+		"./views/html/base.html",
+		"./views/html/partials/nav.html",
+		"./views/html/pages/home.html",
+	}
 
-	// Use the filepath.Glob() function to get a slice of all filepaths that
-	// match the pattern "./ui/html/pages/*.tmpl". This will essentially gives
-	// us a slice of all the filepaths for our application 'page' templates
-	// like: [ui/html/pages/home.tmpl ui/html/pages/view.tmpl]
-	pages, err := filepath.Glob("./views/html/pages/*.html")
+	// Parse the template files...
+	ts, err := template.New("").Funcs(functions).ParseFiles(files...)
 	if err != nil {
-		return nil, err
-	}
-
-	// Loop through the page filepaths one-by-one.
-	for _, page := range pages {
-		// Extract the file name (like 'home.tmpl') from the full filepath
-		// and assign it to the name variable
-		name := filepath.Base(page)
-
-		// Parse the base template file into a template set.
-		ts, err := template.New(name).Funcs(functions).ParseFiles("./views/html/base.html")
-		if err != nil {
-			return nil, err
-		}
-
-		// Parse all the 'partial' templates into the set.
-		ts, err = ts.ParseGlob("./views/html/partials/*.html")
-		if err != nil {
-			return nil, err
-		}
-
-		// Parse the page template file into the set.
-		ts, err = ts.ParseFiles(page)
-		if err != nil {
-			return nil, err
-		}
-
-		// Add the template set to the map, using the name of the page
-		// (like 'home.tmpl') as the key.
-		cache[name] = ts
-	}
-
-	// Return the map
-	return cache, nil
-}
-
-func Render(w http.ResponseWriter, r *http.Request, tmpl string, data *TemplateData, templateCache map[string]*template.Template) {
-	// Retrieve the template set from the cache based on the page name
-	ts, ok := templateCache[tmpl]
-	if !ok {
-		// print error
-		fmt.Println("Error getting template from cache")
+		println(err.Error())
 		return
 	}
 
-	// Initialize a new buffer
-	buf := new(bytes.Buffer)
-
-	// Write the template to the buffer, instead of straight to the
-	// http.ResponseWriter
-	err := ts.ExecuteTemplate(buf, "base", data)
+	// And then execute them. Notice how we are passing in the snippet
+	// data (a models.Snippet struct) as the final parameter?
+	// Pass in the templateData struct when executing the template.
+	err = ts.ExecuteTemplate(w, "base", data)
 	if err != nil {
-		fmt.Println("Error executing template")
-		return
-	}
-
-	// Write the contents of the buffer to the http.ResponseWriter
-	_, err = buf.WriteTo(w)
-	if err != nil {
-		fmt.Println("Error writing template to browser")
+		println(err.Error())
 		return
 	}
 }

@@ -11,7 +11,6 @@ import (
 	"github.com/brightside-dev/go-chi-rest-api-boilerplate/internal/repositories"
 	"github.com/brightside-dev/go-chi-rest-api-boilerplate/internal/routes"
 	"github.com/brightside-dev/go-chi-rest-api-boilerplate/internal/services"
-	"github.com/brightside-dev/go-chi-rest-api-boilerplate/internal/templates"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -60,12 +59,6 @@ func main() {
 }
 
 func newContainer(conf config.Config, db *sql.DB, logger *slog.Logger) *config.Container {
-	templateCache, err := templates.NewTemplateCache()
-	if err != nil {
-		logger.Error(err.Error())
-		os.Exit(1)
-	}
-
 	userRepository := &repositories.UserRepository{DB: db}
 	userService := &services.UserService{UserRepository: userRepository}
 	authService := &services.AuthService{UserRepository: userRepository}
@@ -73,7 +66,6 @@ func newContainer(conf config.Config, db *sql.DB, logger *slog.Logger) *config.C
 
 	return &config.Container{
 		Config:         &conf,
-		TemplateCache:  templateCache,
 		DB:             db,
 		UserService:    userService,
 		AuthService:    authService,

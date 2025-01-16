@@ -38,10 +38,11 @@ func SetupRoutes(r *chi.Mux, container *config.Container) {
 
 	// Serve the static files
 	r.Get("/*", http.FileServer(http.Dir("public")).ServeHTTP)
-	// Admin Views
+
+	// Admin Views Private
 	r.Group(func(r chi.Router) {
 		r.Get("/test", func(w http.ResponseWriter, r *http.Request) {
-			templates.Render(w, r, "index", nil, container.TemplateCache)
+			templates.Render(w, r, "home.html", nil)
 		})
 	})
 }
