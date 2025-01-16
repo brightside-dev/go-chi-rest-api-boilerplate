@@ -15,7 +15,6 @@ func AdminAuth(next http.Handler) http.Handler {
 		return
 
 		// Token is valid, proceed to the next handler
-		//
 		next.ServeHTTP(w, r)
 	})
 }
