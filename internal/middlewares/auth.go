@@ -1,10 +1,10 @@
 package middlewares
 
 import (
-	"errors"
 	"net/http"
 	"time"
 
+	customErr "github.com/brightside-dev/go-chi-rest-api-boilerplate/internal/errors"
 	"github.com/brightside-dev/go-chi-rest-api-boilerplate/internal/utils"
 
 	"github.com/go-chi/jwtauth/v5"
@@ -15,24 +15,20 @@ func Auth(next http.Handler) http.Handler {
 		// Check if token exists
 		_, claims, err := jwtauth.FromContext(r.Context())
 		if err != nil || claims == nil {
-			// Customize the error response
-			customErr := errors.New("invalid token")
-			utils.WriteAPIErrorResponse(w, r, customErr)
+			utils.WriteAPIErrorResponse(w, r, customErr.ErrInvalidJWTToken)
 			return
 		}
 
 		// Verify the token's "exp" exists and is a string
 		expClaim, ok := claims["exp"].(time.Time)
 		if !ok {
-			customErr := errors.New("invalid token: missing or malformed 'exp' claim")
-			utils.WriteAPIErrorResponse(w, r, customErr)
+			utils.WriteAPIErrorResponse(w, r, customErr.ErrInvalidJWTToken)
 			return
 		}
 
 		// Check if the token has expired
 		if time.Now().After(expClaim) {
-			customErr := errors.New("token has expired")
-			utils.WriteAPIErrorResponse(w, r, customErr)
+			utils.WriteAPIErrorResponse(w, r, customErr.ErrJWTTokenExpired)
 			return
 		}
 

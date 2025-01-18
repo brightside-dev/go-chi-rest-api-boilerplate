@@ -3,9 +3,9 @@ package services
 import (
 	"context"
 	"database/sql"
-	"errors"
 
 	"github.com/brightside-dev/go-chi-rest-api-boilerplate/internal/dtos"
+	customErr "github.com/brightside-dev/go-chi-rest-api-boilerplate/internal/errors"
 	"github.com/brightside-dev/go-chi-rest-api-boilerplate/internal/models"
 	"github.com/brightside-dev/go-chi-rest-api-boilerplate/internal/repositories"
 )
@@ -21,7 +21,7 @@ func (us *UserService) NewUserRepository(db *sql.DB) *repositories.UserRepositor
 func (us *UserService) Get(ctx context.Context, id int) (dtos.UserResponseDTO, error) {
 	user, err := us.UserRepository.FindOneById(ctx, id)
 	if err != nil {
-		return dtos.UserResponseDTO{}, err
+		return dtos.UserResponseDTO{}, customErr.ErrFailedToRetrieveUser
 	}
 
 	dto := dtos.UserResponseDTO{
@@ -35,7 +35,7 @@ func (us *UserService) Get(ctx context.Context, id int) (dtos.UserResponseDTO, e
 func (us *UserService) List(ctx context.Context) (dtos.UsersResponseDTO, error) {
 	users, err := us.UserRepository.FindAll(ctx, 0, 0)
 	if err != nil {
-		return dtos.UsersResponseDTO{}, err
+		return dtos.UsersResponseDTO{}, customErr.ErrFailedToRetrieveUser
 	}
 
 	dto := dtos.UsersResponseDTO{
@@ -52,12 +52,12 @@ func (us *UserService) Create(ctx context.Context, user models.User) (dtos.UserR
 	}
 
 	if dbUser != nil {
-		return dtos.UserResponseDTO{}, errors.New("user with email already exists")
+		return dtos.UserResponseDTO{}, customErr.ErrEmailAlreadyRegistered
 	}
 
 	newUser, err := us.UserRepository.Insert(ctx, user)
 	if err != nil {
-		return dtos.UserResponseDTO{}, err
+		return dtos.UserResponseDTO{}, customErr.ErrFailedToInsertUser
 	}
 
 	dto := dtos.UserResponseDTO{
@@ -90,7 +90,7 @@ func (us *UserService) Update(ctx context.Context, user models.User) (dtos.UserR
 	} else {
 		updatedUser, err := us.UserRepository.Update(ctx, user)
 		if err != nil {
-			return dtos.UserResponseDTO{}, err
+			return dtos.UserResponseDTO{}, customErr.ErrFailedToUpdateUser
 		}
 
 		dto.ID = updatedUser.ID

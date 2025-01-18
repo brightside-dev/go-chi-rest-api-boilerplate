@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"time"
 
+	customErr "github.com/brightside-dev/go-chi-rest-api-boilerplate/internal/errors"
 	"github.com/brightside-dev/go-chi-rest-api-boilerplate/internal/models"
 	"github.com/brightside-dev/go-chi-rest-api-boilerplate/internal/services"
 	"github.com/brightside-dev/go-chi-rest-api-boilerplate/internal/utils"
@@ -31,7 +32,7 @@ func NewUserController(userService *services.UserService) *UserController {
 func (uc *UserController) Get(w http.ResponseWriter, r *http.Request) {
 	// check if the id exists in the URL
 	if chi.URLParam(r, "id") == "" {
-		utils.WriteAPIErrorResponse(w, r, errors.New("invalid user ID"))
+		utils.WriteAPIErrorResponse(w, r, customErr.ErrInvalidUserID)
 		return
 	}
 

@@ -2,10 +2,10 @@ package controllers
 
 import (
 	"encoding/json"
-	"errors"
 	"net/http"
 	"time"
 
+	customErr "github.com/brightside-dev/go-chi-rest-api-boilerplate/internal/errors"
 	"github.com/brightside-dev/go-chi-rest-api-boilerplate/internal/models"
 	"github.com/brightside-dev/go-chi-rest-api-boilerplate/internal/services"
 	"github.com/brightside-dev/go-chi-rest-api-boilerplate/internal/utils"
@@ -30,9 +30,7 @@ func (ac *AuthController) Register(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&req)
 	if err != nil {
-		// TODO - refactor custom error message to avoid repetition
-		err = errors.New("invalid request body")
-		utils.WriteAPIErrorResponse(w, r, err)
+		utils.WriteAPIErrorResponse(w, r, customErr.ErrInvalidBody)
 		return
 	}
 
@@ -44,8 +42,7 @@ func (ac *AuthController) Register(w http.ResponseWriter, r *http.Request) {
 	// Parse the Birthday string into time.Time
 	birthday, err := time.Parse("2006-01-02", req.Birthday)
 	if err != nil {
-		error := errors.New("invalid birthday format, expected YYYY-MM-DD")
-		utils.WriteAPIErrorResponse(w, r, error)
+		utils.WriteAPIErrorResponse(w, r, customErr.ErrInvalidBirthdayFormat)
 		return
 	}
 
@@ -76,9 +73,7 @@ func (ac *AuthController) Login(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&req)
 	if err != nil {
-		// TODO - refactor custom error message
-		err = errors.New("invalid request body")
-		utils.WriteAPIErrorResponse(w, r, err)
+		utils.WriteAPIErrorResponse(w, r, customErr.ErrInvalidBody)
 		return
 	}
 

@@ -2,11 +2,11 @@ package services
 
 import (
 	"context"
-	"errors"
 	"strconv"
 	"time"
 
 	"github.com/brightside-dev/go-chi-rest-api-boilerplate/internal/dtos"
+	customErr "github.com/brightside-dev/go-chi-rest-api-boilerplate/internal/errors"
 	"github.com/brightside-dev/go-chi-rest-api-boilerplate/internal/models"
 	"github.com/brightside-dev/go-chi-rest-api-boilerplate/internal/repositories"
 	"golang.org/x/crypto/bcrypt"
@@ -33,10 +33,10 @@ func (as *AuthService) Login(
 	// Retrieve the user from the database by email
 	users, err := as.UserRepository.FindBy(ctx, "email", email, 0, 0)
 	if err != nil {
-		return dtos.LoginResponseDTO{}, errors.New("failed to retrieve user")
+		return dtos.LoginResponseDTO{}, customErr.ErrFailedToRetrieveUser
 	}
 	if len(users) == 0 {
-		return dtos.LoginResponseDTO{}, errors.New("invalid email or password")
+		return dtos.LoginResponseDTO{}, customErr.ErrInvalidEmailOrPassword
 	}
 
 	user := users[0]
@@ -44,7 +44,7 @@ func (as *AuthService) Login(
 	// Compare the provided password with the hashed password in the database
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil {
-		return dtos.LoginResponseDTO{}, errors.New("invalid email or password")
+		return dtos.LoginResponseDTO{}, customErr.ErrInvalidEmailOrPassword
 	}
 
 	// Generate JWT token
@@ -80,17 +80,17 @@ func (as *AuthService) Register(ctx context.Context, user models.User) (dtos.Reg
 	// Check if the user already exists
 	existingUsers, err := as.UserRepository.FindBy(ctx, "email", user.Email, 0, 0)
 	if err != nil {
-		return dtos.RegisterResponseDTO{}, errors.New("failed to check existing users")
+		return dtos.RegisterResponseDTO{}, customErr.ErrInternalServerError
 	}
 
 	if len(existingUsers) > 0 {
-		return dtos.RegisterResponseDTO{}, errors.New("email is already registered")
+		return dtos.RegisterResponseDTO{}, customErr.ErrEmailAlreadyRegistered
 	}
 
 	// Hash the password
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return dtos.RegisterResponseDTO{}, errors.New("failed to hash password")
+		return dtos.RegisterResponseDTO{}, customErr.ErrInternalServerError
 	}
 
 	// Create a new user
